@@ -83,7 +83,9 @@ class AddFragment : Fragment() {
             Toast.makeText(requireContext(),"成功添加!",Toast.LENGTH_SHORT).show()
             findNavController().navigate(R.id.action_addFragment_to_listFragment)
         }else{
-            Toast.makeText(requireContext(),"标题和描述都需要填写",Toast.LENGTH_SHORT).show()
+            val makeText = Toast.makeText(requireContext(), "标题和描述都需要填写", Toast.LENGTH_SHORT)
+            makeText.setMargin(50F, 50F)
+            makeText.show()
         }
     }
 
