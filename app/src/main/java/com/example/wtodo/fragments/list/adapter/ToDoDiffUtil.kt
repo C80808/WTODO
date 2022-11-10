@@ -16,7 +16,7 @@ class ToDoDiffUtil(//通过DiffUtil来托管用户界面更新操作来取代  n
     }
 
     override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-        return oldList[oldItemPosition]==newList[newItemPosition]
+        return oldList[oldItemPosition]==newList[newItemPosition]//三个等号 === 表示比较对象地址，两个 == 表示比较两个值大小。
     }
 
     override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
