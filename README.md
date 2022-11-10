@@ -21,7 +21,7 @@
 - Room
 - RecyclerView Animators （wasabeef）
 ---------------------------------
-- 想要添加的或者改善的功能   
+- 要添加的或者改善的功能   
 
   1.换成Navigation+ViewPage2的浏览架构
  
