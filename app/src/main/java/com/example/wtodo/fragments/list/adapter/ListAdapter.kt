@@ -47,7 +47,7 @@ class ListAdapter: RecyclerView.Adapter<ListAdapter.MyViewHolder>() {
     }
 
 
-    fun setData(toDoData: List<ToDoData>){
+    fun setData(toDoData: List<ToDoData>){//当前的数据每次重新加载Fragmentlist的时候都会更新一次此data
         val toDoDiffUtil=ToDoDiffUtil(dataList,toDoData)
         val toDoDiffResult=DiffUtil.calculateDiff(toDoDiffUtil)
         this.dataList=toDoData//保存了原有数据之后再更新

@@ -22,8 +22,6 @@ import com.example.wtodo.fragments.SharedViewModel
 import com.example.wtodo.fragments.list.adapter.ListAdapter
 import com.example.wtodo.fragments.list.adapter.SwipeToDelete
 import com.google.android.material.snackbar.Snackbar
-import jp.wasabeef.recyclerview.animators.FadeInLeftAnimator
-import jp.wasabeef.recyclerview.animators.ScaleInTopAnimator
 import jp.wasabeef.recyclerview.animators.SlideInUpAnimator
 
 
@@ -51,27 +49,12 @@ class ListFragment : Fragment(){
         val view = inflater.inflate(R.layout.fragment_list, container, false)
         binding = FragmentListBinding.bind(view)
 
-        //set up recyclerView
-        val recyclerView = binding?.recyclerView
-        recyclerView?.adapter = adapter
-        recyclerView?.layoutManager = StaggeredGridLayoutManager(2,StaggeredGridLayoutManager.VERTICAL)
-        //增加控件动画
-        recyclerView?.itemAnimator=SlideInUpAnimator().apply {
-            addDuration=100
-        }
-        recyclerView?.let { swipeToDelete(it) }//非空判断let{}
+        //set up recyclerView  初始化recyclerView
+        binding?.let { setUpRecyclerView(it) } //binding非空则执行
 
 
         //get Databse Data
-        mToDoViewModel.getAllData.observe(viewLifecycleOwner, { data ->
-            adapter.setData(data)
-            mSharedViewModel.checkIfDatabaseEmpty(data)
-        })
-        mSharedViewModel.emptyDatabase.observe(viewLifecycleOwner, {
-            showEmptyDatabaseViews(it)
-        })
-
-
+        initAppDatabaseData()
 
 
         //设置那个加号按键的事件
@@ -83,7 +66,6 @@ class ListFragment : Fragment(){
         //使用MenuHost管理Menu
         // The usage of an interface lets you inject your own implementation
         val menuHost: MenuHost = requireActivity()
-
         // Add menu items without using the Fragment Menu APIs
         // Note how we can tie the MenuProvider to the viewLifecycleOwner
         // and an optional Lifecycle.State (here, RESUMED) to indicate when
@@ -124,8 +106,6 @@ class ListFragment : Fragment(){
                 }
                 return true
             }
-
-
         }, viewLifecycleOwner, Lifecycle.State.RESUMED)
 
 
@@ -133,6 +113,27 @@ class ListFragment : Fragment(){
         /*为什么我这里使用了databinding还是返回view：“这里返回binding.root也是完全没有问题的，大型项目可能使用binding.root会更安全一些,我没有创建一个统一的databindingAdapter类，
         因为这个项目比较小所以我就没有那样子通过一个统一的类去管理各个按钮和视图的点击后操作，正常流程是需要创建一个Adapter类去管理的，
         而且需要修改XML来使用databinding，现在的安卓直接通过findbyid这个操作很可能没法找到目标然后动作就会绑定失败，基本都是通过databinding来操作各个组件了”*/
+    }
+
+    private fun setUpRecyclerView(binding: FragmentListBinding) {
+        val recyclerView = binding.recyclerView
+        recyclerView.adapter = adapter
+        recyclerView.layoutManager = StaggeredGridLayoutManager(2,StaggeredGridLayoutManager.VERTICAL)
+        //增加控件动画
+        recyclerView.itemAnimator =SlideInUpAnimator().apply {
+            addDuration=100
+        }
+        swipeToDelete(recyclerView)//非空判断let{}
+    }
+
+    private fun initAppDatabaseData() {
+        mToDoViewModel.getAllData.observe(viewLifecycleOwner, { data ->
+            mSharedViewModel.checkIfDatabaseEmpty(data)
+            adapter.setData(data)
+        })
+        mSharedViewModel.emptyDatabase.observe(viewLifecycleOwner, {
+            showEmptyDatabaseViews(it)
+        })
     }
 
 
@@ -162,8 +163,10 @@ class ListFragment : Fragment(){
             ItemTouchHelper(swipeToDeleteCallback)  //关于ItemTouchHelper：https://www.jianshu.com/p/d07fd08f72db
         itemTouchHelper.attachToRecyclerView(recyclerView)
     }
+
+
     //恢复向左滑动删除的标签
-    private fun restoreDeletedData(view: View, deletedItem: ToDoData, ) {
+    private fun restoreDeletedData(view: View, deletedItem: ToDoData) {
         val snakeBar = Snackbar.make(
             view, "删除了'${deletedItem.title}'", Snackbar.LENGTH_LONG
         )
@@ -183,6 +186,7 @@ class ListFragment : Fragment(){
             binding?.noDataTextView?.visibility = View.INVISIBLE
         }
     }
+
 
     //删除所有的标签
     private fun deleteAllDataNow() {
