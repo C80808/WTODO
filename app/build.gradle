@@ -26,7 +26,7 @@ android {
         //noinspection ExpiredTargetSdkVersion
         targetSdk 32
         versionCode 1
-        versionName "1.1.3"
+        versionName "1.1.4" //app版本信息
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }

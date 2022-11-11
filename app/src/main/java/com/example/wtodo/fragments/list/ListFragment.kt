@@ -20,6 +20,7 @@ import com.example.wtodo.data.models.ToDoData
 import com.example.wtodo.databinding.FragmentListBinding
 import com.example.wtodo.fragments.SharedViewModel
 import com.example.wtodo.fragments.list.adapter.ListAdapter
+import com.example.wtodo.fragments.list.adapter.OnRecyclerItemClickListener
 import com.example.wtodo.fragments.list.adapter.SwipeToDelete
 import com.google.android.material.snackbar.Snackbar
 import jp.wasabeef.recyclerview.animators.SlideInUpAnimator
@@ -123,7 +124,25 @@ class ListFragment : Fragment(){
         recyclerView.itemAnimator =SlideInUpAnimator().apply {
             addDuration=100
         }
-        swipeToDelete(recyclerView)//非空判断let{}
+        //添加标签的触摸事件监听
+        swipeToDelete(recyclerView)//滑动删除功能添加到列表
+
+        recyclerView.addOnItemTouchListener(object:OnRecyclerItemClickListener(recyclerView){
+            override fun onLongClick(viewHolder: RecyclerView.ViewHolder?) {
+                //跳出一个窗口做操作
+                if(viewHolder!=null){
+                    val position=viewHolder.adapterPosition
+                    val itemToDelete = adapter.dataList[position]
+                    //删除数据
+                    mToDoViewModel.deleteData(itemToDelete)
+                    adapter.removeItem(position)
+                    //给用户一个删除后可以恢复数据的方法
+                    restoreDeletedData(viewHolder.itemView,itemToDelete,position)
+                }
+            }
+        })
+
+
     }
 
     private fun initAppDatabaseData() {
@@ -151,12 +170,14 @@ class ListFragment : Fragment(){
     private fun swipeToDelete(recyclerView: RecyclerView) {
         val swipeToDeleteCallback = object : SwipeToDelete() {
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                val itemToDelete = adapter.dataList[viewHolder.adapterPosition]
+                val position=viewHolder.adapterPosition
+                val itemToDelete = adapter.dataList[position]
                 //删除数据
                 mToDoViewModel.deleteData(itemToDelete)
-                adapter.notifyItemRemoved(viewHolder.adapterPosition)
+                adapter.removeItem(position)
+
                 //给用户一个删除后可以恢复数据的方法
-                restoreDeletedData(viewHolder.itemView,itemToDelete)
+                restoreDeletedData(viewHolder.itemView,itemToDelete,position)
             }
         }
         val itemTouchHelper =
@@ -165,14 +186,14 @@ class ListFragment : Fragment(){
     }
 
 
-    //恢复向左滑动删除的标签
-    private fun restoreDeletedData(view: View, deletedItem: ToDoData) {
+    //恢复删除的标签
+    private fun restoreDeletedData(itemView: View, deletedItem: ToDoData,position: Int) {//有bug，添加的是重复的标签,原因是通过数据库操作后却并没有马上更新adapter里面的list数据,已解决,解决方法：在atapter中添加了自定义的删除removeitem操作来保证List会被更新
         val snakeBar = Snackbar.make(
-            view, "删除了'${deletedItem.title}'", Snackbar.LENGTH_LONG
+            itemView, "删除了'${deletedItem.title}'", Snackbar.LENGTH_LONG
         )
         snakeBar.setAction("取消"){
             mToDoViewModel.insertData(deletedItem)
-
+            adapter.addItem(position,deletedItem)
         }
         snakeBar.show()
     }

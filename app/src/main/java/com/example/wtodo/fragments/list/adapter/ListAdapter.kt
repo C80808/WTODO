@@ -46,8 +46,21 @@ class ListAdapter: RecyclerView.Adapter<ListAdapter.MyViewHolder>() {
         }
     }
 
+    fun removeItem(position: Int){
+        //移除标签
+        dataList.drop(position)
+        notifyItemRemoved(position)
+        notifyItemRangeChanged(position,dataList.size)
+    }
 
-    fun setData(toDoData: List<ToDoData>){//当前的数据每次重新加载Fragmentlist的时候都会更新一次此data
+    fun addItem(position: Int,item: ToDoData){
+        //增加标签
+        dataList= dataList.plus(item)
+        notifyItemInserted(position)
+        notifyItemRangeChanged(position,dataList.size)
+    }
+
+    fun setData(toDoData: List<ToDoData>){//每次回到listfragment都会调用一次检查变化
         val toDoDiffUtil=ToDoDiffUtil(dataList,toDoData)
         val toDoDiffResult=DiffUtil.calculateDiff(toDoDiffUtil)
         this.dataList=toDoData//保存了原有数据之后再更新
